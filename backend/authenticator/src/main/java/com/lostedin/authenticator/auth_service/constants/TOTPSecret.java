@@ -1,6 +1,6 @@
 package com.lostedin.authenticator.auth_service.constants;
 
-import com.lostedin.authenticator.auth_service.model.TOTP;
+import com.lostedin.authenticator.auth_service.model.two_fa.TOTP;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

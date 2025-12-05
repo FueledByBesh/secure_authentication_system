@@ -1,4 +1,4 @@
-package com.lostedin.authenticator.auth_service.model;
+package com.lostedin.authenticator.auth_service.model.two_fa;
 
 import org.springframework.stereotype.Service;
 
