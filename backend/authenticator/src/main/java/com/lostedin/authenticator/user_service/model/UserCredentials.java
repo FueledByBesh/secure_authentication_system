@@ -10,6 +10,7 @@ import java.util.UUID;
 @Setter
 @Getter
 public class UserCredentials {
+
     @Id
     private UUID id;
 

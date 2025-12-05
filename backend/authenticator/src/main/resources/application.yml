@@ -1,0 +1,16 @@
+
+spring:
+  application:
+    name: authenticator
+  datasource:
+    url: jdbc:postgresql://localhost:5433/secure_auth_system
+    username: postgres
+    password: postgres
+
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
