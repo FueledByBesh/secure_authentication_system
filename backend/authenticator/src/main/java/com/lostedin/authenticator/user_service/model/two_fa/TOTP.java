@@ -42,7 +42,7 @@ public class TOTP {
         long counter = timeSeconds / period;
         try {
             byte[] counterBytes = new byte[8];
-            for (int i = 7; i >= 0; i--) { // big-endian
+            for (int i = 7; i >= 0; i--) {
                 counterBytes[i] = (byte) (counter & 0xFF);
                 counter >>= 8;
             }
