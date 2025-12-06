@@ -47,6 +47,15 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+
+    // BCrypt password hashing
+    implementation("org.mindrot:jbcrypt:0.4")
+
+    // JWT (JJWT) for HS256 signing
+    val jjwtVersion = "0.12.6"
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion") // for Jackson serializers
 }
 
 tasks.withType<Test> {

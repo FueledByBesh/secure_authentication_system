@@ -83,7 +83,7 @@ public class UserService {
 
         boolean ok = PasswordEncrypter.verify(password, credentials.getPassword());
         return ok ?
-                UserDataDto.builder().status(200).id(user.getId()).build() :
+                UserDataDto.builder().status(200).id(user.getId()).is_2fa_enabled(credentials.isTwo_fa_enabled()).build() :
                 ResponseDto.builder().status(403).message("Wrong credentials").build();
     }
 

@@ -16,4 +16,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserIdWithResponseDto extends ApiMessageDto {
     UUID id;
+    Boolean is_2fa_enabled;
 }

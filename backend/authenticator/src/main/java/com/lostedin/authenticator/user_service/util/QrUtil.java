@@ -1,4 +1,4 @@
-package com.lostedin.authenticator.auth_service.model;
+package com.lostedin.authenticator.user_service.util;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;

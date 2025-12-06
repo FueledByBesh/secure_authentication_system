@@ -18,3 +18,10 @@ spring:
 logging:
   level:
     com.lostedin.authenticator: DEBUG
+
+jwt:
+  # Use a strong random Base64-encoded key of at least 256 bits (32 bytes) for HS256
+  # This is a sample dev secret; replace in production via environment/property overrides
+  secret: "bXktdmVyeS1sb25nLWRldi1zZWNyZXQta2V5LXNob3VsZC1iZS1iYXNlNjQtMzItYnl0ZXM="
+  access-ttl-seconds: 900        # 15 minutes
+  refresh-ttl-seconds: 1209600    # 14 days

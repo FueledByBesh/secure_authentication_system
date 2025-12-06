@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class AuthorizationService {
 
     private final UserAPI userAPI;
+    private final SessionService sessionService;
 
     public UserIdWithResponseDto authorizeUser(AuthDto user){
         return userAPI.validate(user.getUsername(), user.getPassword());
