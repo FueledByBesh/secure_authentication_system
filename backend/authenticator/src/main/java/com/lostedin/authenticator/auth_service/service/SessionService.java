@@ -1,5 +1,6 @@
 package com.lostedin.authenticator.auth_service.service;
 
+import com.lostedin.authenticator.auth_service.dto.ApiMessageDto;
 import com.lostedin.authenticator.auth_service.dto.TokenDto;
 import com.lostedin.authenticator.auth_service.entity.Session;
 import com.lostedin.authenticator.auth_service.model.token.JwtUtil;
@@ -66,6 +67,18 @@ public class SessionService {
         return createSession(session.getUserId());
     }
 
+
+    public ApiMessageDto deleteSession(String refreshToken){
+        log.info("Deleting session for refresh token: {}", refreshToken);
+        Optional<UUID> optionalSessionId = jwtUtil.validateRefreshToken(refreshToken);
+        if(optionalSessionId.isEmpty())
+            return ApiMessageDto.builder().status(401).message("Unauthorized").build();
+        UUID sessionId = optionalSessionId.get();
+        if(!sessionRepo.existsById(sessionId))
+            return ApiMessageDto.builder().status(404).message("Session not found").build();
+        sessionRepo.deleteById(sessionId);
+        return ApiMessageDto.builder().status(200).message("Session deleted").build();
+    }
 
 
 }

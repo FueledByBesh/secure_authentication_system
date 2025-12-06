@@ -1,11 +1,13 @@
 package com.lostedin.authenticator.user_service.service;
 
+import com.lostedin.authenticator.user_service.dto.ResponseDto;
 import com.lostedin.authenticator.user_service.dto.UserSettingsDto;
 import com.lostedin.authenticator.user_service.model.User;
 import com.lostedin.authenticator.user_service.model.UserCredentials;
 import com.lostedin.authenticator.user_service.model.two_fa.TOTP;
 import com.lostedin.authenticator.user_service.repo.UserCredentialsRepo;
 import com.lostedin.authenticator.user_service.repo.UserRepo;
+import com.lostedin.authenticator.user_service.util.PasswordEncrypter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,5 +61,24 @@ public class UserSettingsService {
         userCredentials.setTwo_fa_enabled(false);
         userCredentials.setTotp_secret(null);
         credentialsRepo.saveAndFlush(userCredentials);
+    }
+
+    public ResponseDto changePassword(UUID userId, String oldPassword , String newPassword){
+        Optional<UserCredentials> credentials = credentialsRepo.getByUserId(userId);
+        if(credentials.isEmpty()){
+            throw new RuntimeException("Internal Server Error: User not found");
+        }
+        UserCredentials userCredentials = credentials.get();
+        if(!PasswordEncrypter.verify(oldPassword, userCredentials.getPassword()))
+            return ResponseDto.builder().status(400).message("Wrong password").build();
+        if(newPassword.length() < 8)
+            return ResponseDto.builder().status(400).message("Password must be at least 8 characters long").build();
+        if(newPassword.equals(oldPassword))
+            return ResponseDto.builder().status(400).message("New password must be different from old one").build();
+
+        userCredentials.setPassword(PasswordEncrypter.hash(newPassword));
+        credentialsRepo.saveAndFlush(userCredentials);
+        return ResponseDto.builder().status(200).message("Password changed").build();
+
     }
 }

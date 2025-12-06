@@ -47,7 +47,7 @@ public class AuthController {
             ResponseCookie cookie2 = ResponseCookie.from("refresh-token",response.getRefresh_token())
                     .httpOnly(true)
                     .maxAge(60*60*24*14)
-                    .path("/auth/refresh").build();
+                    .path("/auth").build();
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie1.toString())
                     .header(HttpHeaders.SET_COOKIE, cookie2.toString())
@@ -71,7 +71,7 @@ public class AuthController {
             ResponseCookie cookie2 = ResponseCookie.from("refresh-token",response.getRefresh_token())
                     .httpOnly(true)
                     .maxAge(60*60*24*14)
-                    .path("/auth/refresh").build();
+                    .path("/auth").build();
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie1.toString())
                     .header(HttpHeaders.SET_COOKIE, cookie2.toString())
@@ -79,6 +79,23 @@ public class AuthController {
         }
 
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/logout")
+    protected ResponseEntity<@NonNull ApiMessageDto> logout(@CookieValue("access-token") String accessToken){
+        ApiMessageDto messageDto = sessionService.deleteSession(accessToken);
+        ResponseCookie accessCookie = ResponseCookie.from("access-token", "")
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/").build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh-token","")
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/auth").build();
+        return ResponseEntity.status(messageDto.getStatus())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(messageDto);
     }
 
 }
