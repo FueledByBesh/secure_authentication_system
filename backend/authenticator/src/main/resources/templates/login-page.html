@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="${title}">Login</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif; margin: 0; }
+    .container { max-width: 520px; margin: 40px auto; padding: 24px; }
+    h1 { font-size: 1.6rem; margin: 0 0 16px; }
+    .card { border: 1px solid #9993; border-radius: 12px; padding: 20px; }
+    label { display: block; font-weight: 600; margin: 10px 0 6px; }
+    input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #9996; }
+    button { margin-top: 14px; padding: 10px 14px; border-radius: 8px; border: 1px solid #5556; background: #2d6cdf; color: white; font-weight: 600; cursor: pointer; width: 100%; }
+    .row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    a { color: #2d6cdf; text-decoration: none; }
+    .status { margin-top: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; padding: 8px 10px; border-radius: 8px; border: 1px solid #9995; }
+    .ok { color: #05620a; border-color: #2bbf2f55; background: #2bbf2f0f; }
+    .err { color: #7b1111; border-color: #ff616155; background: #ff61610f; }
+  </style>
+  <script>
+    async function login(ev){
+      ev?.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const status = document.getElementById('status');
+      status.textContent = 'Authorizing…';
+      status.className = 'status';
+      try {
+        const res = await fetch('/auth/authorize', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) { throw new Error(data.message || 'Authorization failed'); }
+        // create session to receive tokens (cookies will be set by us from response)
+        const sessRes = await fetch('/auth/create-session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: data.id })
+        });
+        const sess = await sessRes.json();
+        if (!sessRes.ok) { throw new Error(sess.message || 'Session creation failed'); }
+        // place tokens into cookies (Lax)
+        if (sess.access_token) {
+          document.cookie = `access-token=${sess.access_token}; Path=/; SameSite=Lax`;
+        }
+        if (sess.refresh_token) {
+          document.cookie = `refresh-token=${sess.refresh_token}; Path=/; SameSite=Lax`;
+        }
+        status.className = 'status ok';
+        status.textContent = 'Login successful';
+        // Redirect depending on 2FA
+        if (data.is_2fa_enabled) {
+          window.location.href = '/app/auth/2fa';
+        } else {
+          window.location.href = '/app/settings';
+        }
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = e.message || 'Request failed';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('form').addEventListener('submit', login);
+    });
+  </script>
+  <link rel="icon" href="data:," />
+</head>
+<body>
+  <div class="container">
+    <h1 th:text="${title}">Login</h1>
+    <div class="card">
+      <form id="form">
+        <label for="username">Username</label>
+        <input id="username" name="username" autocomplete="username" />
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" autocomplete="current-password" />
+        <button type="submit">Sign in</button>
+        <div class="row">
+          <span>New here?</span>
+          <a href="/app/register">Create an account</a>
+        </div>
+        <div id="status" class="status">Awaiting input…</div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

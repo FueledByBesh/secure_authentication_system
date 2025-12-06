@@ -2,6 +2,7 @@ package com.lostedin.authenticator.auth_service.controller;
 
 import com.lostedin.authenticator.auth_service.dto.ApiMessageDto;
 import com.lostedin.authenticator.auth_service.dto.AuthDto;
+import com.lostedin.authenticator.auth_service.dto.TokenDto;
 import com.lostedin.authenticator.auth_service.dto.UserIdWithResponseDto;
 import com.lostedin.authenticator.auth_service.dto.user.UserIdDto;
 import com.lostedin.authenticator.auth_service.service.SessionService;
@@ -9,11 +10,10 @@ import com.lostedin.authenticator.auth_service.service.AuthorizationService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -38,7 +38,46 @@ public class AuthController {
 
     @PostMapping("/create-session")
     protected ResponseEntity<@NonNull ApiMessageDto> createSession(@RequestBody UserIdDto userIdDto){
-        ApiMessageDto response = sessionService.createSession(userIdDto.getId());
+        TokenDto response = sessionService.createSession(userIdDto.getId());
+        if(response.getStatus()==201){
+            ResponseCookie cookie1 = ResponseCookie.from("access-token", response.getAccess_token())
+                    .httpOnly(true)
+                    .maxAge(60*15)
+                    .path("/").build();
+            ResponseCookie cookie2 = ResponseCookie.from("refresh-token",response.getRefresh_token())
+                    .httpOnly(true)
+                    .maxAge(60*60*24*14)
+                    .path("/auth/refresh").build();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie1.toString())
+                    .header(HttpHeaders.SET_COOKIE, cookie2.toString())
+                    .body(response);
+        }
+
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/refresh")
+    protected ResponseEntity<@NonNull TokenDto> refreshSession(
+            @CookieValue("refresh-token") String refreshToken
+    ){
+        TokenDto response = sessionService.refreshSession(refreshToken);
+
+        if(response.getStatus()==201){
+            ResponseCookie cookie1 = ResponseCookie.from("access-token", response.getAccess_token())
+                    .httpOnly(true)
+                    .maxAge(60*15)
+                    .path("/").build();
+            ResponseCookie cookie2 = ResponseCookie.from("refresh-token",response.getRefresh_token())
+                    .httpOnly(true)
+                    .maxAge(60*60*24*14)
+                    .path("/auth/refresh").build();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie1.toString())
+                    .header(HttpHeaders.SET_COOKIE, cookie2.toString())
+                    .body(response);
+        }
+
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

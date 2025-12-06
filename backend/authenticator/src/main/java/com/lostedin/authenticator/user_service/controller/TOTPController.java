@@ -47,14 +47,13 @@ public class TOTPController {
 
     @GetMapping(value = "/totp-qr", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> totp_qr(
-            @RequestParam(value = "size", required = false, defaultValue = "256") int size,
             @CookieValue(value = "access-token") String accessToken
     ) {
         UUID userId = getIdFromToken(accessToken);
 
         String totp_uri = totpService.getTotpUri(userId);
 
-        byte[] png = QrUtil.generatePng(totp_uri, size);
+        byte[] png = QrUtil.generatePng(totp_uri, 256);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
                 .contentType(MediaType.IMAGE_PNG)

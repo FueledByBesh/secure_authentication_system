@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -45,6 +46,24 @@ public class SessionService {
                 .status(201)
                 .message("Session created")
                 .build();
+    }
+
+    public TokenDto refreshSession(String refreshToken){
+        log.info("Refreshing session for refresh token: {}", refreshToken);
+
+        Optional<UUID> optionalSessionId = jwtUtil.validateRefreshToken(refreshToken);
+        if(optionalSessionId.isEmpty())
+            return TokenDto.builder().status(401).message("Unauthorized").build();
+        UUID sessionId = optionalSessionId.get();
+        Optional<Session> optionalSession = sessionRepo.findById(sessionId);
+        if(optionalSession.isEmpty())
+            return TokenDto.builder().status(401).message("Unauthorized").build();
+
+        Session session = optionalSession.get();
+        if(!Hasher.verify(refreshToken, session.getRefresh_token()))
+            return TokenDto.builder().status(401).message("Unauthorized").build();
+        sessionRepo.deleteById(sessionId);
+        return createSession(session.getUserId());
     }
 
 
