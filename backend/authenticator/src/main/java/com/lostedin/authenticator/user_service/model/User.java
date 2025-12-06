@@ -20,10 +20,9 @@ public class User {
     private UUID id;
     @Column(nullable = false)
     private String username;
-    @Column(nullable = false)
-    private String email;
+//    private String email;
 
-    @OneToOne
+    @OneToOne(mappedBy = "user",orphanRemoval = true)
     private UserCredentials credentials;
 
 }

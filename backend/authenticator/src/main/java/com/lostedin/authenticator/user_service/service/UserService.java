@@ -1,7 +1,7 @@
 package com.lostedin.authenticator.user_service.service;
 
 
-import com.lostedin.authenticator.user_service.dto.CreateUserDto;
+import com.lostedin.authenticator.user_service.dto.SignUpDto;
 import com.lostedin.authenticator.user_service.dto.ResponseDto;
 import com.lostedin.authenticator.user_service.dto.UserDataDto;
 import com.lostedin.authenticator.user_service.model.User;
@@ -9,21 +9,25 @@ import com.lostedin.authenticator.user_service.model.UserCredentials;
 import com.lostedin.authenticator.user_service.repo.UserCredentialsRepo;
 import com.lostedin.authenticator.user_service.repo.UserRepo;
 import com.lostedin.authenticator.user_service.util.PasswordEncrypter;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepo userRepo;
     private final UserCredentialsRepo credentialsRepo;
+//    private final EntityManager entityManager;
 
-    public ResponseDto createUser(CreateUserDto userDto){
+    public ResponseDto createUser(SignUpDto userDto){
         if (userRepo.getByUsername(userDto.getUsername()).isPresent()) {
             return ResponseDto.builder().status(409).message("Username already taken").build();
         }
@@ -43,8 +47,7 @@ public class UserService {
                 .user(user)
                 .password(encryptedPassword)
                 .build();
-        credentialsRepo.save(credentials);
-
+        credentialsRepo.saveAndFlush(credentials);
         return UserDataDto.builder().status(201).message("User created").id(user.getId()).build();
     }
 
@@ -54,15 +57,20 @@ public class UserService {
             return ResponseDto.builder().status(404).message("User not found").build();
 
         User user = optionalUser.get();
+        UserCredentials credentials = user.getCredentials();
         return UserDataDto.builder()
                 .status(200)
                 .id(id)
                 .username(user.getUsername())
+                .password(credentials.getPassword())
+                .is_2fa_enabled(credentials.isTwo_fa_enabled())
+                .totp_secret(credentials.getTotp_secret())
                 .build();
     }
 
     public ResponseDto validateUser(String username, String password){
 
+        log.debug("Validating user {} with password {}", username, password);
         Optional<User> optionalUser = userRepo.getByUsername(username);
         if (optionalUser.isEmpty())
             return ResponseDto.builder().status(404).message("User not found").build();

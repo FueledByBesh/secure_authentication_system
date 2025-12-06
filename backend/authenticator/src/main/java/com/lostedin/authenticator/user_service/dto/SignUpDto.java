@@ -1,11 +1,11 @@
 package com.lostedin.authenticator.user_service.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class CreateUserDto {
-
+@NoArgsConstructor
+public class SignUpDto {
     String username;
     String password;
-
 }

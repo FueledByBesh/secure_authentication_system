@@ -19,12 +19,13 @@ public class UserCredentials {
     @Column(nullable = false)
     private String password;
     @Column(nullable = false)
+    @Builder.Default
     private boolean two_fa_enabled = false;
     private String totp_secret;
 
     @OneToOne
     @MapsId
-    @JoinColumn
+    @JoinColumn(name = "id")
     private User user;
 
 }

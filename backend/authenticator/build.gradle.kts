@@ -44,6 +44,9 @@ dependencies {
     implementation("com.google.zxing:core:3.5.4")
     // For MatrixToImageWriter and BufferedImage helpers
     implementation("com.google.zxing:javase:3.5.4")
+
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
 }
 
 tasks.withType<Test> {
