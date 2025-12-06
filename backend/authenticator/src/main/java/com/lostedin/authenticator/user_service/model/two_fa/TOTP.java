@@ -4,17 +4,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TOTP {
-    // RFC 6238 (TOTP) implementation with RFC 4226 (HOTP) truncation and RFC 4648 Base32
 
-    // Default parameters
     private static final int DEFAULT_DIGITS = 6;
-    private static final int DEFAULT_PERIOD = 30; // seconds
-    private static final String DEFAULT_ALGO = "HmacSHA1"; // also supports HmacSHA256, HmacSHA512
+    private static final int DEFAULT_PERIOD = 30;
+    private static final String DEFAULT_ALGO = "HmacSHA1";
 
-    /**
-     * Generate a random Base32 (RFC 4648) secret suitable for TOTP.
-     * @param numBytes number of random bytes before Base32 encoding (recommend 20)
-     */
     public String generateSecret(int numBytes) {
         if (numBytes <= 0) throw new IllegalArgumentException("numBytes must be > 0");
         byte[] random = new byte[numBytes];
@@ -23,17 +17,10 @@ public class TOTP {
         return Base32.encode(random);
     }
 
-    /**
-     * Generate current TOTP code for the given Base32 secret using default parameters.
-     */
     public String currentCode(String base32Secret) {
         return codeAt(base32Secret, System.currentTimeMillis() / 1000L, DEFAULT_DIGITS, DEFAULT_PERIOD, DEFAULT_ALGO);
     }
 
-    /**
-     * Verify a code allowing a small window of time-steps to account for clock skew.
-     * @param window number of steps to check before/after current (e.g., 1 allows +/- 1 step)
-     */
     public boolean verifyCode(String base32Secret, String code, int window) {
         return verifyCode(base32Secret, code, DEFAULT_DIGITS, DEFAULT_PERIOD, DEFAULT_ALGO, window);
     }
@@ -48,9 +35,6 @@ public class TOTP {
         return false;
     }
 
-    /**
-     * Compute TOTP code at a specific Unix time (seconds).
-     */
     public String codeAt(String base32Secret, long timeSeconds, int digits, int period, String algorithm) {
         if (digits < 6 || digits > 10) throw new IllegalArgumentException("digits must be between 6 and 10");
         if (period <= 0) throw new IllegalArgumentException("period must be > 0");
@@ -126,16 +110,14 @@ public class TOTP {
         }
     }
 
-    // Minimal RFC 4648 Base32 without padding management complexities for common TOTP secrets.
     private static final class Base32 {
         private static final char[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".toCharArray();
         private static final int[] LOOKUP = new int[128];
         static {
             java.util.Arrays.fill(LOOKUP, -1);
             for (int i = 0; i < ALPHABET.length; i++) LOOKUP[ALPHABET[i]] = i;
-            // also accept lowercase
             for (int i = 0; i < ALPHABET.length; i++) LOOKUP[Character.toLowerCase(ALPHABET[i])] = i;
-            LOOKUP['='] = 0; // padding
+            LOOKUP['='] = 0;
         }
 
         static String encode(byte[] data) {
@@ -156,7 +138,6 @@ public class TOTP {
                 int index = (buffer << (5 - bitsLeft)) & 0x1F;
                 sb.append(ALPHABET[index]);
             }
-            // Standard Base32 uses padding '=', but authenticator apps accept unpadded too.
             return sb.toString();
         }
 

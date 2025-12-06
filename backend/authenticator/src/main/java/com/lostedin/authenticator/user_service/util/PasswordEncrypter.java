@@ -8,11 +8,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Objects;
 
-/**
- * Utility for hashing and verifying passwords using PBKDF2 with HMAC-SHA256.
- *
- * Stored format: pbkdf2$<iterations>$<saltBase64>$<hashBase64>
- */
+
 public class PasswordEncrypter {
 
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
@@ -24,9 +20,6 @@ public class PasswordEncrypter {
 
     private PasswordEncrypter() {}
 
-    /**
-     * Hashes a raw password using PBKDF2WithHmacSHA256 and returns a formatted string safe to store.
-     */
     public static String hash(String rawPassword) {
         Objects.requireNonNull(rawPassword, "rawPassword");
         byte[] salt = new byte[SALT_LENGTH_BYTES];
@@ -37,9 +30,6 @@ public class PasswordEncrypter {
         return String.format("pbkdf2$%d$%s$%s", DEFAULT_ITERATIONS, saltB64, hashB64);
     }
 
-    /**
-     * Verifies a raw password against a previously stored hash string.
-     */
     public static boolean verify(String rawPassword, String stored) {
         if (rawPassword == null || stored == null) return false;
         String[] parts = stored.split("\\$");

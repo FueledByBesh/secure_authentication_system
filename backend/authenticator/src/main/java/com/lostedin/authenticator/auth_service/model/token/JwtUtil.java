@@ -27,7 +27,6 @@ public class JwtUtil {
             @Value("${jwt.access-ttl-seconds:900}") long accessTtlSeconds,         // default 15 minutes
             @Value("${jwt.refresh-ttl-seconds:1209600}") long refreshTtlSeconds    // default 14 days
     ) {
-        // Use base64 if provided; otherwise bytes directly. Ensure 256-bit minimum for HS256
         SecretKey tmp;
         try {
             byte[] bytes = Decoders.BASE64.decode(secret);

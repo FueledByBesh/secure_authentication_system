@@ -39,6 +39,7 @@ public class AuthController {
     @PostMapping("/create-session")
     protected ResponseEntity<@NonNull ApiMessageDto> createSession(@RequestBody UserIdDto userIdDto){
         TokenDto response = sessionService.createSession(userIdDto.getId());
+        log.info("Access token: {}, \n refresh token: {}", response.getAccess_token(), response.getRefresh_token());
         if(response.getStatus()==201){
             ResponseCookie cookie1 = ResponseCookie.from("access-token", response.getAccess_token())
                     .httpOnly(true)
@@ -62,7 +63,7 @@ public class AuthController {
             @CookieValue("refresh-token") String refreshToken
     ){
         TokenDto response = sessionService.refreshSession(refreshToken);
-
+        log.info("Access token: {}, \n refresh token: {}", response.getAccess_token(), response.getRefresh_token());
         if(response.getStatus()==201){
             ResponseCookie cookie1 = ResponseCookie.from("access-token", response.getAccess_token())
                     .httpOnly(true)

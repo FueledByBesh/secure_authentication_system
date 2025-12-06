@@ -79,6 +79,5 @@ public class UserSettingsService {
         userCredentials.setPassword(PasswordEncrypter.hash(newPassword));
         credentialsRepo.saveAndFlush(userCredentials);
         return ResponseDto.builder().status(200).message("Password changed").build();
-
     }
 }
